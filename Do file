@@ -39,6 +39,9 @@ graph export figure1.png, replace
 ***************************************************************************
 ******************** Questions 6 ******************************************
 ***************************************************************************
+***************************************************************************
+******************** Questions 6 ******************************************
+***************************************************************************
 
 /*for the weighted regression */
 graph twoway scatter years_school pop_census_bin100 || ///
@@ -70,56 +73,44 @@ graph export figure3.png, replace
 
 clear all
 use SIN19932001
-drop if pop_census<=4400 | pop_census>5690
-count 
-count if pop_census>=5000 /*approximately 550 units in each grouop*/
+cap gen cc=_n
 
-collapse (mean) years_school, by (pop_census_bin100)
+drop if cc<=1166 | cc>2749
+count /*approximately half of the sample*/
 
-preserve
-drop if pop_census>=5000
-regress years_school pop_census
+collapse (mean) years_school pop_census, by (pop_census_bin100)
+
+regress years_school pop_census if pop_census<5000
 predict yhat_small
-save reduced2_, replace
 
-restore
-drop if pop_census<5000
-regress years_school pop_census
+regress years_school pop_census if pop_census>=5000
 predict yhat_big
-append using reduced2_
 
-graph twoway scatter years_school pop_census_bin100 ///
-|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
-line yhat_big pop_census_bin100, ytitle(Average mayor's years of education) xtitle(Population size) ///
+graph twoway scatter years_school pop_census ///
+|| line yhat_small pop_census if pop_census<5000, lcolor(black) lwidth(medthick) || ///
+line yhat_big pop_census if pop_census>=5000, ytitle(Average mayor's years of education) xtitle(Population size) ///
 lcolor(black) lwidth(medthick) legend(off)
 graph export figure4.png, replace
 
 clear all
 use SIN19932001
-drop if pop_census<=4684 | pop_census>5295
-count
-count if pop_census>=5000 /*approximately 275 units in each grouop*/
+cap gen cc=_n
+drop if cc<=1562 | cc>2353
+count /*approximately one quarter of the sample*/
 
-collapse (mean) years_school, by (pop_census_bin100)
+collapse (mean) pop_census years_school, by (pop_census_bin100)
 
-preserve
-drop if pop_census>=5000
-regress years_school pop_census
-predict yhat_small
-save reduced2_, replace
+regress years_school pop_census if pop_census<5000
+predict yhat_small_
 
-restore
-drop if pop_census<5000
-regress years_school pop_census
-predict yhat_big
-append using reduced2_
+regress years_school pop_census if pop_census>=5000
+predict yhat_big_
 
-graph twoway scatter years_school pop_census_bin100 ///
-|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
-line yhat_big pop_census_bin100, ytitle(Average mayor's years of education) xtitle(Population size) ///
+graph twoway scatter years_school pop_census ///
+|| line yhat_small_ pop_census if pop_census<5000, lcolor(black) lwidth(medthick) || ///
+line yhat_big_ pop_census if pop_census>=5000, ytitle(Average mayor's years of education) xtitle(Population size) ///
 lcolor(black) lwidth(medthick) legend(off)
 graph export figure5.png, replace
-
 
 
 ***************************************************************************
