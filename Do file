@@ -1,0 +1,391 @@
+clear all
+cls
+set more off
+cd "/Users/najmabader/Stata/Ass 3"
+
+capture log close
+log using assignment3, text replace
+
+***************************************************************************
+******************** Questions 1-3 ****************************************
+***************************************************************************
+
+/*See the attached pdf file*/
+
+***************************************************************************
+******************** Questions 4 ******************************************
+***************************************************************************
+use SIN19932001
+
+
+
+collapse (mean) years_school=years_school (semean) se=years_school, by (pop_census_bin100)
+
+gen lower = years_school - se
+gen upper = years_school + se
+
+graph twoway scatter years_school pop_census_bin100, ///
+ytitle(Average mayor's years of education) xtitle(Population size) ///
+ || rcap lower upper pop_census_bin100
+
+graph export figure1.png, replace
+
+***************************************************************************
+******************** Questions 5 ******************************************
+***************************************************************************
+
+/*See the attached pdf file */
+
+***************************************************************************
+******************** Questions 6 ******************************************
+***************************************************************************
+
+/*for the weighted regression */
+graph twoway scatter years_school pop_census_bin100 || ///
+lowess years_school pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess years_school pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(Average mayor's years of education) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+
+graph export figure2.png, replace
+
+/*for the local linear regression */
+preserve
+drop if pop_census>=5000
+regress years_school pop_census
+predict yhat_small
+save reduced_, replace
+restore
+
+drop if pop_census<5000
+regress years_school pop_census
+predict yhat_big
+append using reduced_
+
+graph twoway scatter years_school pop_census_bin100 ///
+|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
+line yhat_big pop_census_bin100, ytitle(Average mayor's years of education) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export figure3.png, replace
+
+clear all
+use SIN19932001
+drop if pop_census<=4400 | pop_census>5690
+count 
+count if pop_census>=5000 /*approximately 550 units in each grouop*/
+
+collapse (mean) years_school, by (pop_census_bin100)
+
+preserve
+drop if pop_census>=5000
+regress years_school pop_census
+predict yhat_small
+save reduced2_, replace
+
+restore
+drop if pop_census<5000
+regress years_school pop_census
+predict yhat_big
+append using reduced2_
+
+graph twoway scatter years_school pop_census_bin100 ///
+|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
+line yhat_big pop_census_bin100, ytitle(Average mayor's years of education) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export figure4.png, replace
+
+clear all
+use SIN19932001
+drop if pop_census<=4684 | pop_census>5295
+count
+count if pop_census>=5000 /*approximately 275 units in each grouop*/
+
+collapse (mean) years_school, by (pop_census_bin100)
+
+preserve
+drop if pop_census>=5000
+regress years_school pop_census
+predict yhat_small
+save reduced2_, replace
+
+restore
+drop if pop_census<5000
+regress years_school pop_census
+predict yhat_big
+append using reduced2_
+
+graph twoway scatter years_school pop_census_bin100 ///
+|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
+line yhat_big pop_census_bin100, ytitle(Average mayor's years of education) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export figure5.png, replace
+
+
+
+***************************************************************************
+******************** Questions 7 ******************************************
+***************************************************************************
+/*Test 1: no jump in density of population size at the threshold*/
+clear all
+use SIN19932001
+histogram pop_census, bin(36) frequency kdensity color(blue) ///
+fcolor(bluishgray) lwidth(medthick) xtitle(Population size)
+graph export test1.png, replace
+
+/*Test 2: no discontinuity in the covariates at the threshold*/
+clear all
+use SIN19932001
+collapse (mean) gender age, by (pop_census_bin100)
+
+graph twoway scatter gender pop_census_bin100 || ///
+lowess gender pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess gender pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(Probability that mayor is woman) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+
+graph export test2a.png, replace
+
+graph twoway scatter age pop_census_bin100 || ///
+lowess age pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess age pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(Mayor's age) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export test2b.png, replace
+
+clear all
+use SIN19932001
+sort id_city
+quietly by id_city:  gen dup = cond(_N==1,0,_n)
+tab dup
+drop if dup>1 /*so that we have only one observation per city*/
+
+collapse (mean) extension alt_center NORTH, by (pop_census_bin100)
+
+graph twoway scatter extension pop_census_bin100 || ///
+lowess extension pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess extension pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(City's area) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export test2c.png, replace
+
+graph twoway scatter alt_center pop_census_bin100 || ///
+lowess alt_center pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess alt_center pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(City's altitude) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export test2d.png, replace
+
+graph twoway scatter NORTH pop_census_bin100 || ///
+lowess NORTH pop_census_bin100 if pop_census_bin100<5000, lcolor(black) lwidth(medthick) ///
+|| lowess NORTH pop_census_bin100 if pop_census_bin100>=5000, ///
+ytitle(Probability that city is North) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export test2e.png, replace /*here I see a jump, try also with LLR */
+
+preserve
+drop if pop_census>=5000
+regress NORTH pop_census
+predict yhat_small
+save reduced_, replace
+restore
+
+drop if pop_census<5000
+regress NORTH pop_census
+predict yhat_big
+append using reduced_
+
+graph twoway scatter NORTH pop_census_bin100 ///
+|| line yhat_small pop_census_bin100, lcolor(black) lwidth(medthick) || ///
+line yhat_big pop_census_bin100, ytitle(Probability that city is North) xtitle(Population size) ///
+lcolor(black) lwidth(medthick) legend(off)
+graph export figure2e_.png, replace /*still the jump, check the distribution*/
+
+tab NORTH if pop_census<5000
+tab NORTH if pop_census>=5000 /*approximately same probability*/
+
+
+***************************************************************************
+******************** Questions 8 ******************************************
+***************************************************************************
+clear all
+cls
+use SIN19932001
+eststo clear
+
+
+* Normalize the data
+
+gen x_n = pop_census - 5000
+gen d = (x_n >= 0)
+gen d_x_n = d*x_n
+
+* ROT bandwidht
+
+capture gen pop_census_2 = pop_census^2
+capture gen pop_census_3 = pop_census^3
+capture gen pop_census_4 = pop_census^4
+qui reg years_school pop_census pop_census_2 pop_census_3 pop_census_4
+
+matrix b = e(b)
+
+capture gen quartic_derivative = (2*b[1,2] + 6*b[1,3]*pop_census + 12*b[1,4]*pop_census_2)^2
+qui sum quartic_derivative
+local m = r(sum)
+
+qui sum pop_census
+local R = r(max) - r(min)
+
+local h_rot = 2.702 * ((e(rmse)^2 * `R')/`m')^(1/5)
+
+display `h_rot'
+
+
+* bandwidht = full sample
+
+reg years_school x_n d d_x_n
+eststo
+reg years_school x_n d d_x_n gender age extension alt_center NORTH
+eststo
+
+* bandwidht = half sample
+
+reg years_school x_n d d_x_n if x_n > -600 & x_n < 600
+eststo
+reg years_school x_n d d_x_n gender age extension alt_center NORTH ///
+if x_n > -600 & x_n < 600
+eststo
+
+* bandwidht = ROT bandwidth (526.723)
+
+reg years_school x_n d d_x_n if x_n > -526.723 & x_n < 526.723
+eststo
+reg years_school x_n d d_x_n gender age extension alt_center NORTH ///
+if x_n > -526.723 & x_n < 526.723
+eststo
+
+* bandwidht = one fourth of sample
+
+reg years_school x_n d d_x_n if x_n > -300 & x_n < 300
+eststo
+reg years_school x_n d d_x_n gender age extension alt_center NORTH ///
+if x_n > -300 & x_n < 300
+eststo
+
+
+esttab using rdregression.tex, se replace  ///
+title(Local Regression Estimates\label{tab1})    ///
+mtitles("Full sample" "Full sample" "Half sample" ///
+"Half sample" "ROT Bandwidth" "ROT Bandwidth" "One fourth of sample" "One fourth of sample")  ///
+addnote("Source: Data on Italian Municipalities from 1993 to 2001, dataset: SIN19932001.dta ")
+
+* implementing regression with polynomials
+
+
+local k = 4
+
+eststo clear
+
+matrix output = J(4, 12 , 1)
+
+local r = 1
+foreach bandwidth in `R' 1200 `h_rot' 600 {
+	local i = 1
+	local c = 1
+	global vars = "x_n d d_x_n"
+	
+	while(`i' <= `k'){
+		capture gen x_n_`i' = x_n^`i'
+		capture gen d_x_n_`i' = d * x_n^`i'
+		global vars = "$vars x_n_`i' d_x_n_`i'"
+		
+		qui reg years_school $vars if x_n > -(`bandwidth'/2) & x_n < (`bandwidth'/2)
+		local bd = _b[d]
+		local sed = _se[d]
+		
+		local aic = e(N) * log(e(rmse)^2) + 2*(`i' + 1)
+		
+		
+		matrix output[`r', `c'] = `aic'
+		local c = `c' + 1
+		matrix output[`r', `c'] = `bd'
+		local c = `c' + 1
+		matrix output[`r', `c'] = `sed'
+		local c = `c' + 1
+		
+		local i = `i' + 1
+	}
+	local r =  `r' + 1
+}
+
+local h_rot_rounded = round(`h_rot'/2)
+local r_bw =`R'/2
+matrix rownames output = "bw=`r_bw'" "bw=600" "bw=`h_rot_rounded'*" "bw=300" 
+
+matrix output = output'
+
+frmttable using polynomials, statmat(output) title("Table 1") ///
+	tex replace rtitles( ///
+	"K=1", "AIC" \ "", "b" \ "", "se"\ ///
+	"K=2", "AIC" \ "", "b" \ "", "se"\ ///
+	"K=3", "AIC" \ "", "b" \ "", "se"\ ///
+	"K=4", "AIC" \ "", "b" \ "", "se")
+
+* checking AIC with covariates for ROT bandwidth (k=1)
+
+qui reg years_school x_n d d_x_n  gender age extension alt_center NORTH ///
+if x_n > -526.723 & x_n < 526.723
+local aic_rot = e(N) * log(e(rmse)^2) + (2*2)
+display `aic_rot'
+
+***************************************************************************
+******************** Questions 9 ******************************************
+***************************************************************************
+ 
+clear all
+cls
+set more off
+use SIN19932001
+
+
+* Using Fuji, Imbens and Kalyanaraman optimal bandwidth algorithm
+
+rdob years_school pop_census, c(5000)
+
+*optimal bandwidth=  5.5558942
+*RD estimate: 3.6333333 (.54075566)
+
+
+* Using Cattaneo et al. method 
+
+rdrobust years_school pop_census, c(5000)  all
+
+*To see what bandwidth it is using:
+rdbwselect years_school pop_census, c(5000) all
+
+
+* Using Nichols method 
+
+
+
+*Estimate and graphs for the optimal bandwidth, the double and hald of that bandwidth
+
+rd years_school pop_census, gr z0(5000)
+
+
+
+
+
+* with robust confidence intervals
+
+
+* we present rdplot with confidence intervals
+rdplot years_school pop_census, c(5000) binselect(es) ci(95) ///
+graph_options(title("RD Plot:  Data on Italian Majors from 1993 to 2001") ///
+ytitle(Elected Major's years of education) ///
+xtitle(Inhabitans per municipality) ///
+graphregion(color(white)))
+					 
+graph export "figure1.png", replace
+
+*we estimate treatment effect using Nichols method 
+rd years_school pop_census, z0(5000)
