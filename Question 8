@@ -1,0 +1,146 @@
+\documentclass[10pt,a4paper]{article}
+\setlength\parindent{0pt}
+\usepackage{adjustbox}
+\usepackage{graphicx}
+
+
+\begin{document}
+\section{Question 8}
+
+We perform a local linear regression (LLR) restricting the sample to the observations within a distance \textit h on either side of
+the threshold, i.e. $ x_i \in [x_n - h ,x_n + h ]$.
+We will consider the following symmetric bandwidths:
+\begin{itemize}
+	\item h = 1746 (full sample)
+	\item h = 600 (approximately half sample)
+	\item h = 300 (approximately one fourth of sample)
+	\item h = ROT bandwidth to be estimated
+\end{itemize}
+
+We estimate the effect of interest with the following model:
+
+\begin{equation}
+Y_i=\alpha_0 + \beta_0 x_{ni} + D_i (\gamma_0 + \gamma_1 x_{ni}) + \epsilon_i
+\end{equation}
+
+For ease of interpretation, we \lq\lq normalize" our data by subtracting the cutoff value from the forcing variable (i.e. $x_n= popcensus - x_c$). 
+The coefficient of interest (the one that represents the impact of a 33\% percent wage increase on the level of education of the elected major) is estimated by the value $\gamma_0$.\\
+
+\medskip
+To estimate the rule-of-thumb (ROT) bandwidth we use the
+whole relevant data range and compute the formula presented in the paper \lq\lq Regression Discontinuity Designs in Economics" by Lee  and Lemieux (2009).
+
+
+\begin{equation}
+h_{ROT}=2.702 \left(\frac {\widetilde{\sigma^2}R} {\sum_{i=1}^{N} (\widetilde{m^''}(x_i))^2}\right)^{1/5}
+\end{equation}
+
+\medskip
+
+We get a bandwidth of approximately 1053.
+Below we present the table of the estimated coefficient of interest (i.e. the coefficient of \lq\lq d") exploring different bandwidth and adding covariates.
+
+\begin{center}
+\begin{adjustbox}{width=\textwidth}\
+\begin{tabular}{l*{8}{c}}
+	\hline\hline
+	&\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+	&\multicolumn{1}{c}{Full sample}&\multicolumn{1}{c}{Full sample}&\multicolumn{1}{c}{Half sample}&\multicolumn{1}{c}{Half sample}&\multicolumn{1}{c}{ROT Bandwidth}&\multicolumn{1}{c}{ROT Bandwidth}&\multicolumn{1}{c}{One fourth of sample}&\multicolumn{1}{c}{One fourth of sample}\\
+	\hline
+	x\_n         &  -0.0000975         &  -0.0000437         &   -0.000600         &    -0.00111         &   -0.000618         &    -0.00114         &   -0.000857         &    -0.00159         \\
+	&  (0.000139)         &  (0.000136)         &  (0.000737)         &  (0.000719)         &  (0.000944)         &  (0.000923)         &   (0.00214)         &   (0.00209)         \\
+	[1em]
+	d           &       0.518\sym{*}  &       0.399         &       0.960\sym{*}  &       1.002\sym{**} &       1.147\sym{**} &       1.167\sym{**} &       1.609\sym{**} &       1.560\sym{**} \\
+	&     (0.218)         &     (0.213)         &     (0.374)         &     (0.363)         &     (0.400)         &     (0.389)         &     (0.514)         &     (0.502)         \\
+	[1em]
+	d\_x\_n       &  -0.0000384         &  -0.0000379         &  -0.0000216         &    0.000672         &    -0.00102         &   -0.000156         &    -0.00371         &    -0.00199         \\
+	&  (0.000219)         &  (0.000213)         &   (0.00111)         &   (0.00108)         &   (0.00133)         &   (0.00130)         &   (0.00289)         &   (0.00281)         \\
+	[1em]
+	gender      &                     &       0.566\sym{**} &                     &       0.363         &                     &       0.390         &                     &       0.181         \\
+	&                     &     (0.214)         &                     &     (0.381)         &                     &     (0.407)         &                     &     (0.490)         \\
+	[1em]
+	age         &                     &     -0.0592\sym{***}&                     &     -0.0691\sym{***}&                     &     -0.0698\sym{***}&                     &     -0.0729\sym{***}\\
+	&                     &   (0.00580)         &                     &   (0.00995)         &                     &    (0.0107)         &                     &    (0.0144)         \\
+	[1em]
+	extension   &                     &    -0.00350\sym{*}  &                     &     0.00153         &                     &     0.00306         &                     &     0.00265         \\
+	&                     &   (0.00147)         &                     &   (0.00269)         &                     &   (0.00286)         &                     &   (0.00350)         \\
+	[1em]
+	alt\_center  &                     &    0.000682\sym{**} &                     &    0.000809         &                     &    0.000572         &                     &     0.00111         \\
+	&                     &  (0.000243)         &                     &  (0.000446)         &                     &  (0.000483)         &                     &  (0.000624)         \\
+	[1em]
+	NORTH       &                     &      -0.712\sym{***}&                     &      -0.363         &                     &      -0.287         &                     &      -0.224         \\
+	&                     &     (0.112)         &                     &     (0.196)         &                     &     (0.211)         &                     &     (0.265)         \\
+	[1em]
+	\_cons      &       14.09\sym{***}&       17.18\sym{***}&       13.81\sym{***}&       16.78\sym{***}&       13.80\sym{***}&       16.76\sym{***}&       13.74\sym{***}&       16.69\sym{***}\\
+	&     (0.147)         &     (0.325)         &     (0.267)         &     (0.552)         &     (0.293)         &     (0.602)         &     (0.387)         &     (0.803)         \\
+	\hline
+	\(N\)       &        3105         &        3105         &        1018         &        1018         &         906         &         906         &         524         &         524         \\
+	\hline\hline
+	\multicolumn{9}{l}{\footnotesize Standard errors in parentheses}\\
+	\multicolumn{9}{l}{\footnotesize Source: Data on Italian Municipalities from 1993 to 2001, dataset: SIN19932001.dta }\\
+	\multicolumn{9}{l}{\footnotesize \sym{*} \(p<0.05\), \sym{**} \(p<0.01\), \sym{***} \(p<0.001\)}\\
+\end{tabular}
+\end{adjustbox}
+\end{center}
+
+
+Choosing a bandwidth in LLR estimation involves finding an optimal balance between precision and bias. One the
+one hand, using a larger bandwidth yields more precise estimates and indeed we see standard errors decreasing as we increase our bandwidths. This happens because more observations are available to
+estimate the regression and hence the estimation is more precise. On the other hand, when a
+larger bandwidth is used, the linear specification is less likely to be accurate, which in turns translate to a larger bias in the estimation of the treatment effect.
+
+By adding covariates we perform an important validity check for our RD design: in general we see that the inclusion of baseline covariates does not significantly affect the estimated treatment effect, thus confirming that the no-manipulation assumption holds.
+
+The only exception is the estimation over the full sample: when we add covariates the treatment effect drops from 0.518 to 0.300 and is no longer significant. It appears that the baseline specification is not robust.
+
+\medskip
+
+We also implement different polynomial approximations over the entire sample.
+We estimate the effect of interest with the following model:
+
+\begin{equation}
+Y_i=\sum_{k=0}^{p} (\beta_k x_{ni}^k) + D_i \sum_{k=0}^{p} (\gamma_k x_{ni}^k) + \eta_i
+\end{equation}
+
+Table 1 summarizes the variation in estimated treatment effect, by bandwidth and order of polynomial.
+
+\begin{center}
+\begin{adjustbox}{width=\textwidth}\
+\begin{center}
+	\smallskip\begin{large}Table 1\end{large}\\
+	\smallskip
+	\begin{tabular}{llcccc}
+		\hline \noalign{\smallskip} &  & bw=1746 & bw=600 & bw=527* & bw=300\\
+		\noalign{\smallskip}\hline \noalign{\smallskip}K=1 & AIC & 6,801.01 & 2,218.53 & 1,976.71 & 1,117.78\\
+		& b & 0.50 & 0.96 & 1.15 & 1.61\\
+		& se & 0.22 & 0.37 & 0.40 & 0.51\\
+		K=2 & AIC & 6,800.83 & 2,211.03 & 1,974.81 & 1,117.71\\
+		& b & 0.95 & 2.06 & 2.07 & 2.72\\
+		& se & 0.33 & 0.55 & 0.59 & 0.75\\
+		K=3 & AIC & 6,798.42 & 2,214.77 & 1,978.18 & 1,121.12\\
+		& b & 1.61 & 2.24 & 2.43 & 2.38\\
+		& se & 0.44 & 0.72 & 0.77 & 1.01\\
+		K=4 & AIC & 6,802.33 & 2,218.13 & 1,981.90 & 1,117.97\\
+		& b & 1.69 & 2.64 & 2.55 & 1.12\\
+		& se & 0.55 & 0.91 & 0.98 & 1.26\\
+		\noalign{\smallskip}\hline\end{tabular}\\
+\end{center}
+\end{adjustbox}
+
+Within bandwidth we can exploit the AIC to choose the optimal polynomial order.
+We also notice that as the bandwidth decreases, the AIC improves. On the other hand, when we look at higher order of polynomials within the same bandwidth, the standard errors related to the coefficient of interest increases with no major improvement of the Akaike Information Criterion.
+
+Lastly, as a robustness check we take the baseline first order regression on the ROT bandwidth and add covariates.  As we have already mentioned above, if the RD design is valid, adding covariates should increase efficiency but should not affect identification and the point estimate.  The estimated treatment effect with covariates added is 1.167 with a standard error of 0.389, which is higher than the baseline coefficient estimate of 1.147 but qualitatively similar.
+
+The AIC from adding covariates is 1924.3263, which represents an improvement over the baseline AIC of 1976.7129. This is consistent with the RD design being valid.  If the treatment is already properly identified, then the covariates shouldn’t add bias but will reduce variance, thus greatly improving the AIC score.
+
+
+
+
+
+
+
+
+
+\end{document}
+
